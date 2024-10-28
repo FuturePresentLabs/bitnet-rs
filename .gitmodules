@@ -1,0 +1,3 @@
+[submodule "BitNet"]
+	path = BitNet
+	url = git@github.com:microsoft/BitNet.git
