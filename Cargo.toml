@@ -11,4 +11,5 @@ cxx = "1.0"       # for binding to C++
 
 [build-dependencies]
 cxx-build = "1.0" # for building the bindings
+cc = "1.0"
 glob = "0.3"

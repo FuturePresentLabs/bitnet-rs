@@ -210,11 +210,11 @@ int main(int argc, char ** argv) {
     return main_logic(argc, argv);
 }
 
-int run() {
-    // Define default arguments directly
-    char* argv[] = {"llama-cli", "-m", "BitNet/models/Llama3-8B-1.58-100B-tokens/ggml-model-i2_s.gguf", "--prompt", "\"Once", "upon", "a", "time\""};
-    int argc = sizeof(argv) / sizeof(argv[0]);
+/* int run() { */
+/*     // Define default arguments directly */
+/*     char* argv[] = {"llama-cli", "-m", "BitNet/models/Llama3-8B-1.58-100B-tokens/ggml-model-i2_s.gguf", "--prompt", "\"Once", "upon", "a", "time\""}; */
+/*     int argc = sizeof(argv) / sizeof(argv[0]); */
 
-    // Call the original function with default `argc` and `argv`
-    return main_logic(argc, argv);
-}
+/*     // Call the original function with default `argc` and `argv` */
+/*     return main_logic(argc, argv); */
+/* } */
