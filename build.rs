@@ -1,5 +1,5 @@
 use glob::glob;
-use std::path::{PathBuf, Path};
+use std::path::PathBuf;
 
 const IGNORED: &[&str] = &["examples", "tests", "ggml-cann", "ggml-kompute", "ggml-sycl", "ggml-vulkan", "ggml-cuda"];
 
@@ -32,7 +32,6 @@ fn main() {
         .collect();
 
     cxx_build::bridge("src/main.rs")
-        .file("src/bitnet_model.cpp")
         .file("src/main.cpp")
         .files(&cpp_files)
         .includes(INCLUDE)
@@ -45,9 +44,8 @@ fn main() {
         .flag_if_supported("-std=c11")
         .compile("ggml_c_files");
 
-    println!("cargo:rerun-if-changed=src/lib.rs");
-    println!("cargo:rerun-if-changed=src/ggml-bitnet-mad.cpp");
-    println!("cargo:rerun-if-changed=src/ggml-bitnet-lut.cpp");
-    println!("cargo:rerun-if-changed=src/ggml-bitnet.h");
+    println!("cargo:rerun-if-changed=src/main.cpp");
+    println!("cargo:rerun-if-changed=src/bitnet_model.cpp");
+    println!("cargo:rerun-if-changed=include/bitnet_model.h");
 }
 

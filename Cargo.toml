@@ -8,6 +8,7 @@ description = "Rust bindings for bitnet.cpp"
 
 [dependencies]
 cxx = "1.0"       # for binding to C++
+rand = "0.8.5"
 
 [build-dependencies]
 cxx-build = "1.0" # for building the bindings
