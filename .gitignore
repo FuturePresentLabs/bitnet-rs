@@ -1,4 +1,5 @@
 /target
+/.ccls-cache/**
 
 
 # Added by cargo
