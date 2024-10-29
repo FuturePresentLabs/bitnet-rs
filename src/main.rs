@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use rand::seq::IteratorRandom; // Import the trait for random selection
+use ffi::LlamaConfig;
 
 #[cxx::bridge]
 mod ffi {
@@ -7,58 +8,73 @@ mod ffi {
         include!("bitnet-rs/include/bitnet_model.h");
 
         unsafe fn run_cli(args: Vec<String>) -> i32;
+
+        unsafe fn run_inference(config: LlamaConfig) -> Result<InferenceResponse>;
     }
+
+    #[derive(Debug)]
+    pub struct InferenceResponse {
+        pub output: Vec<String>
+    }
+
+    #[derive(Debug)]
+    pub struct LlamaConfig {
+        model_path: String,
+        batch_size: i32,
+        context_size: i32,
+        threads: i32,
+        ngl: i32,
+        num_tokens: i32,
+        temperature: i32,
+        pub prompt: String,
+    }
+
 }
 
-#[derive(Debug)]
-struct LlamaConfig {
-    model_path: String,
-    batch_size: i32,
-    context_size: i32,
-    threads: i32,
-    ngl: i32,
-    num_tokens: i32,
-    temperature: i32,
-    prompt: String,
-}
-
-impl LlamaConfig {
-    // Create a new instance with default values
-    fn new() -> Self {
-        Self {
-            model_path: "BitNet/models/Llama3-8B-1.58-100B-tokens/ggml-model-i2_s.gguf".to_string(),
-            // model_path: "BitNet/models/bitnet_b1_58-3B/ggml-model-tl1.gguf".to_string(),
-            batch_size: 2,
-            context_size: 2048,
-            threads: 8,
-            ngl: 0,
-            num_tokens: 50,
-            temperature: 0,
-            prompt: "Once upon a time I told a great story. Remind me of it".to_string(),
+impl ffi::LlamaConfig {
+        // Create a new instance with default values
+        fn new() -> Self {
+            Self {
+                model_path: "BitNet/models/Llama3-8B-1.58-100B-tokens/ggml-model-i2_s.gguf".to_string(),
+                // model_path: "BitNet/models/bitnet_b1_58-3B/ggml-model-tl1.gguf".to_string(),
+                batch_size: 1,
+                context_size: 2048,
+                threads: 8,
+                ngl: 0,
+                num_tokens: 5,
+                temperature: 0,
+                prompt: "Once upon a time I told a great story. Remind me of it".to_string(),
+            }
         }
-    }
 
-    // Convert config fields to `argv` format for FFI calls
-    fn to_argv(&self) -> Vec<String> {
-        vec![
-            "llama-cli".to_string(),
-            "-b".to_string(), self.batch_size.to_string(),
-            "-c".to_string(), self.context_size.to_string(),
-            "-t".to_string(), self.threads.to_string(),
-            "-n".to_string(), self.num_tokens.to_string(),
-            "-ngl".to_string(), self.ngl.to_string(),
-            "--temp".to_string(), self.temperature.to_string(),
-            "-m".to_string(), self.model_path.clone(),
-            "-p".to_string(), self.prompt.clone(),
-        ]
-    }
+        fn prompt(prompt: String, tokens: i32) -> Self {
+            let mut config = LlamaConfig::new();
+            config.prompt = prompt;
+            config.num_tokens = tokens;
+            return config;
+        }
 
-    fn help(&self) -> Vec<String> {
-        vec![
-            "llama-cli".to_string(),
-            "--help".to_string()
-        ]
-    }
+        // Convert config fields to `argv` format for FFI calls
+        fn to_argv(&self) -> Vec<String> {
+            vec![
+                "llama-cli".to_string(),
+                "-b".to_string(), self.batch_size.to_string(),
+                "-c".to_string(), self.context_size.to_string(),
+                "-t".to_string(), self.threads.to_string(),
+                "-n".to_string(), self.num_tokens.to_string(),
+                "-ngl".to_string(), self.ngl.to_string(),
+                "--temp".to_string(), self.temperature.to_string(),
+                "-m".to_string(), self.model_path.clone(),
+                "-p".to_string(), self.prompt.clone(),
+            ]
+        }
+
+        fn help(&self) -> Vec<String> {
+            vec![
+                "llama-cli".to_string(),
+                "--help".to_string()
+            ]
+        }
 }
 
 fn help() {
@@ -135,10 +151,12 @@ fn get_prompt() -> String {
 }
 
 fn main() {
-    let mut config = LlamaConfig::new();
+    let config = LlamaConfig::prompt(get_prompt(), 50);
 
     // config.prompt = get_prompt();
-    config.prompt = "1+1+11=? Answer:".to_string();
+    // // config.prompt = "1+1+11=? Answer:".to_string();
 
-    run(&config);
+    // run(&config);
+    let response = unsafe {ffi::run_inference(config)};
+    println!("Response: {:?}", response.unwrap().output.join(""));
 }
